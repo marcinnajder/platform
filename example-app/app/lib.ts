@@ -7,5 +7,9 @@ import { Observable } from 'rxjs/Observable';
 export function choose<T extends Action, R>(
   selector: (a: T) => R | null
 ): OperatorFunction<T, R> {
-  return o => o.pipe(map(a => selector(a)), filter(a => (a as any) as boolean));
+  return o =>
+    o.pipe(
+      map(a => selector(a)),
+      filter(a => (a as any) as boolean)
+    ) as Observable<R>;
 }
