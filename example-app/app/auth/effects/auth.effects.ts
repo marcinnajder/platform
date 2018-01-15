@@ -2,49 +2,49 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Effect, Actions, ofType } from '@ngrx/effects';
 import { of } from 'rxjs/observable/of';
-import { tap, map, exhaustMap, catchError } from 'rxjs/operators';
+import { tap, map, exhaustMap, catchError, filter } from 'rxjs/operators';
 
 import { AuthService } from '../services/auth.service';
-import {
-  Login,
-  LoginSuccess,
-  LoginFailure,
-  AuthActionTypes,
-} from '../actions/auth';
+import { AuthActions } from '../actions/auth';
 import { User, Authenticate } from '../models/user';
+import { choose } from '../../lib';
 
 @Injectable()
 export class AuthEffects {
   @Effect()
   login$ = this.actions$.pipe(
-    ofType(AuthActionTypes.Login),
-    map((action: Login) => action.payload),
+    choose(a => (a.type === 'AUTH_LOGIN' ? a.payload : null)),
     exhaustMap((auth: Authenticate) =>
       this.authService
         .login(auth)
         .pipe(
-          map(user => new LoginSuccess({ user })),
-          catchError(error => of(new LoginFailure(error)))
+          map(
+            user =>
+              <AuthActions>{ type: 'AUTH_LOGIN_SUCCESS', payload: { user } }
+          ),
+          catchError(error =>
+            of(<AuthActions>{ type: 'AUTH_LOGIN_FAILURE', payload: error })
+          )
         )
     )
   );
 
   @Effect({ dispatch: false })
   loginSuccess$ = this.actions$.pipe(
-    ofType(AuthActionTypes.LoginSuccess),
+    filter(a => a.type === 'AUTH_LOGIN_SUCCESS'),
     tap(() => this.router.navigate(['/']))
   );
 
   @Effect({ dispatch: false })
   loginRedirect$ = this.actions$.pipe(
-    ofType(AuthActionTypes.LoginRedirect, AuthActionTypes.Logout),
+    filter(a => a.type === 'AUTH_REDIRECT' || a.type === 'AUTH_LOGOUT'),
     tap(authed => {
       this.router.navigate(['/login']);
     })
   );
 
   constructor(
-    private actions$: Actions,
+    private actions$: Actions<AuthActions>,
     private authService: AuthService,
     private router: Router
   ) {}

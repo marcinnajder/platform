@@ -1,11 +1,8 @@
 import { createSelector } from '@ngrx/store';
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { Book } from '../models/book';
-import { BookActions, BookActionTypes } from '../actions/book';
-import {
-  CollectionActions,
-  CollectionActionTypes,
-} from '../actions/collection';
+import { BookActions } from '../actions/book';
+import { CollectionActions } from '../actions/collection';
 
 /**
  * @ngrx/entity provides a predefined interface for handling
@@ -45,8 +42,8 @@ export function reducer(
   action: BookActions | CollectionActions
 ): State {
   switch (action.type) {
-    case BookActionTypes.SearchComplete:
-    case CollectionActionTypes.LoadSuccess: {
+    case 'BOOKS_SEARCH_COMPLETE':
+    case 'COLLECTION_LOAD_SUCCESS': {
       return {
         /**
          * The addMany function provided by the created adapter
@@ -60,7 +57,7 @@ export function reducer(
       };
     }
 
-    case BookActionTypes.Load: {
+    case 'BOOKS_LOAD': {
       return {
         /**
          * The addOne function provided by the created adapter
@@ -74,7 +71,7 @@ export function reducer(
       };
     }
 
-    case BookActionTypes.Select: {
+    case 'BOOKS_SELECT': {
       return {
         ...state,
         selectedBookId: action.payload,

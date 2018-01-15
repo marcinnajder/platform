@@ -1,4 +1,4 @@
-import { AuthActions, AuthActionTypes } from './../actions/auth';
+import { AuthActions } from './../actions/auth';
 import { User } from '../models/user';
 
 export interface State {
@@ -13,7 +13,7 @@ export const initialState: State = {
 
 export function reducer(state = initialState, action: AuthActions): State {
   switch (action.type) {
-    case AuthActionTypes.LoginSuccess: {
+    case 'AUTH_LOGIN_SUCCESS': {
       return {
         ...state,
         loggedIn: true,
@@ -21,7 +21,7 @@ export function reducer(state = initialState, action: AuthActions): State {
       };
     }
 
-    case AuthActionTypes.Logout: {
+    case 'AUTH_LOGOUT': {
       return initialState;
     }
 

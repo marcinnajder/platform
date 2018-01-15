@@ -1,16 +1,20 @@
-import { Action } from '@ngrx/store';
+export type LayoutActions2 =
+  | { type: 'LAYOUT_OPEN_SIDENAV' }
+  | { type: 'LAYOUT_CLOSE_SIDENAV' };
 
-export enum LayoutActionTypes {
-  OpenSidenav = '[Layout] Open Sidenav',
-  CloseSidenav = '[Layout] Close Sidenav',
-}
+// import { Action } from '@ngrx/store';
 
-export class OpenSidenav implements Action {
-  readonly type = LayoutActionTypes.OpenSidenav;
-}
+// export enum LayoutActionTypes {
+//   OpenSidenav = '[Layout] Open Sidenav',
+//   CloseSidenav = '[Layout] Close Sidenav',
+// }
 
-export class CloseSidenav implements Action {
-  readonly type = LayoutActionTypes.CloseSidenav;
-}
+// export class OpenSidenav implements Action {
+//   readonly type = LayoutActionTypes.OpenSidenav;
+// }
 
-export type LayoutActions = OpenSidenav | CloseSidenav;
+// export class CloseSidenav implements Action {
+//   readonly type = LayoutActionTypes.CloseSidenav;
+// }
+
+// export type LayoutActions = OpenSidenav | CloseSidenav;

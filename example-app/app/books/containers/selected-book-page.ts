@@ -3,7 +3,7 @@ import { Store, select } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
 import * as fromBooks from '../reducers';
-import * as collection from '../actions/collection';
+import { CollectionActions } from '../actions/collection';
 import { Book } from '../models/book';
 
 @Component({
@@ -30,10 +30,16 @@ export class SelectedBookPageComponent {
   }
 
   addToCollection(book: Book) {
-    this.store.dispatch(new collection.AddBook(book));
+    this.store.dispatch<CollectionActions>({
+      type: 'COLLECTION_ADD_BOOK',
+      payload: book,
+    });
   }
 
   removeFromCollection(book: Book) {
-    this.store.dispatch(new collection.RemoveBook(book));
+    this.store.dispatch<CollectionActions>({
+      type: 'COLLECTION_REMOVE_BOOK',
+      payload: book,
+    });
   }
 }

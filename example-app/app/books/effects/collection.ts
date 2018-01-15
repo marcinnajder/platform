@@ -5,22 +5,12 @@ import { Database } from '@ngrx/db';
 import { Observable } from 'rxjs/Observable';
 import { defer } from 'rxjs/observable/defer';
 import { of } from 'rxjs/observable/of';
-import { Load } from './../actions/book';
 
-import {
-  CollectionActions,
-  LoadFail,
-  LoadSuccess,
-  AddBookSuccess,
-  AddBookFail,
-  CollectionActionTypes,
-  RemoveBook,
-  RemoveBookFail,
-  RemoveBookSuccess,
-  AddBook,
-} from './../actions/collection';
 import { Book } from '../models/book';
 import { switchMap, toArray, map, catchError, mergeMap } from 'rxjs/operators';
+
+import { choose } from '../../lib';
+import { CollectionActions } from '../actions/collection';
 
 @Injectable()
 export class CollectionEffects {
@@ -41,45 +31,73 @@ export class CollectionEffects {
 
   @Effect()
   loadCollection$: Observable<Action> = this.actions$.pipe(
-    ofType(CollectionActionTypes.Load),
+    choose(a => a.type === 'COLLECTION_LOAD'),
     switchMap(() =>
-      this.db
-        .query('books')
-        .pipe(
-          toArray(),
-          map((books: Book[]) => new LoadSuccess(books)),
-          catchError(error => of(new LoadFail(error)))
+      this.db.query('books').pipe(
+        toArray(),
+        map(
+          (books: Book[]) =>
+            <CollectionActions>{
+              type: 'COLLECTION_LOAD_SUCCESS',
+              payload: books,
+            }
+        ),
+        catchError(error =>
+          of(<CollectionActions>{
+            type: 'COLLECTION_LOAD_FAIL',
+            payload: error,
+          })
         )
+      )
     )
   );
 
   @Effect()
   addBookToCollection$: Observable<Action> = this.actions$.pipe(
-    ofType(CollectionActionTypes.AddBook),
-    map((action: AddBook) => action.payload),
+    choose(a => (a.type === 'COLLECTION_ADD_BOOK' ? a.payload : null)),
     mergeMap(book =>
-      this.db
-        .insert('books', [book])
-        .pipe(
-          map(() => new AddBookSuccess(book)),
-          catchError(() => of(new AddBookFail(book)))
+      this.db.insert('books', [book]).pipe(
+        map(
+          () =>
+            <CollectionActions>{
+              type: 'COLLECTION_ADD_BOOK_SUCCESS',
+              payload: book,
+            }
+        ),
+        catchError(() =>
+          of(<CollectionActions>{
+            type: 'COLLECTION_ADD_BOOK_FAIL',
+            payload: book,
+          })
         )
+      )
     )
   );
 
   @Effect()
   removeBookFromCollection$: Observable<Action> = this.actions$.pipe(
-    ofType(CollectionActionTypes.RemoveBook),
-    map((action: RemoveBook) => action.payload),
+    choose(a => (a.type === 'COLLECTION_REMOVE_BOOK' ? a.payload : null)),
     mergeMap(book =>
-      this.db
-        .executeWrite('books', 'delete', [book.id])
-        .pipe(
-          map(() => new RemoveBookSuccess(book)),
-          catchError(() => of(new RemoveBookFail(book)))
+      this.db.executeWrite('books', 'delete', [book.id]).pipe(
+        map(
+          () =>
+            <CollectionActions>{
+              type: 'COLLECTION_REMOVE_BOOK_SUCCESS',
+              payload: book,
+            }
+        ),
+        catchError(() =>
+          of(<CollectionActions>{
+            type: 'COLLECTION_ADD_BOOK_FAIL',
+            payload: book,
+          })
         )
+      )
     )
   );
 
-  constructor(private actions$: Actions, private db: Database) {}
+  constructor(
+    private actions$: Actions<CollectionActions>,
+    private db: Database
+  ) {}
 }
